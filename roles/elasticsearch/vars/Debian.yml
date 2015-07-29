@@ -1,0 +1,8 @@
+---
+elk_common_packages:
+    - openntpd
+    - python-apt
+    - python-pycurl
+    - python-pip
+    - git-core
+    - jq

@@ -1,0 +1,9 @@
+---
+elk_kibana:
+  version: 4.0.0-beta3
+  path: /opt/kibana
+  port: 5601
+  user: kibana
+  password: kibana
+  allowed_addresses:
+    - 127.0.0.1

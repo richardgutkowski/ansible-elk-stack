@@ -1,0 +1,7 @@
+---
+  # vars for logstash-forwarder
+logstash_forwarder_logstash_server: 127.0.0.1
+logstash_forwarder_logstash_server_port: 5000
+logstash_ssl_dir: /etc/pki/logstash/
+logstash_log_type: syslog
+logstash_logging_directory: /home/vagrant/*.log

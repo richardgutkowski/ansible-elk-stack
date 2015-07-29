@@ -1,0 +1,7 @@
+---
+# Supervisor variables
+
+supervisor:
+    port: 9001
+    username: supervisor
+    password: supervisor

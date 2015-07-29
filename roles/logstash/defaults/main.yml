@@ -1,0 +1,6 @@
+elk_logstash:
+  version: 1.4
+  pid_file: /var/run/logstash.pid
+  port: 4560
+  configs:
+    - { src: logstash-simple.conf.j2, dest: simple.conf }

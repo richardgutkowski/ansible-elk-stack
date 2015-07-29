@@ -1,0 +1,16 @@
+input {
+  tcp {
+    port => {{ elk_logstash.port }}
+    codec => json
+  }
+
+  file {
+    path => "/home/vagrant/*.log"
+  }
+
+}
+
+output {
+  elasticsearch_http { host => localhost }
+  stdout { codec => rubydebug }
+}

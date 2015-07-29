@@ -1,0 +1,89 @@
+---
+# tasks file for roles/bastly.logstash-forwarder
+- name: logstash-forwarder | Make sure the dependencies are installed
+  apt: pkg={{ item }}
+  sudo: yes
+  with_items:
+    - git
+    - ruby-dev
+    - build-essential
+
+- name: Download go
+  command: wget https://storage.googleapis.com/golang/go1.4.1.linux-amd64.tar.gz chdir=/tmp creates=/tmp/go1.4.1.linux-amd64.tar.gz
+
+- name: untar go
+  command: tar -C /usr/local -xzf /tmp/go1.4.1.linux-amd64.tar.gz creates=/usr/local/go
+  sudo: yes
+
+- name: add export PATH=$PATH:/usr/local/go/bin to /etc/profile
+  lineinfile: dest=/etc/profile line="export PATH=$PATH:/usr/local/go/bin"
+  sudo: yes
+
+- name: add export PATH=$PATH:/usr/local/go/bin to /root/.profile
+  lineinfile: dest=/root/.profile line="export PATH=$PATH:/usr/local/go/bin"
+  sudo: yes
+
+- name: git clone git://github.com/elasticsearch/logstash-forwarder.git
+  git: repo=https://github.com/elasticsearch/logstash-forwarder.git dest=/tmp/logstash-forwarder accept_hostkey=True
+
+- name: go build
+  command: env PATH=$PATH:/usr/local/go/bin go build chdir=/tmp/logstash-forwarder
+  sudo: yes
+
+- name: gem install fpm
+  command: gem install fpm
+  sudo: yes
+
+- name: checkout working commit
+  command: git checkout 9c69a36a55897af4792f3c78b14267dd93abcc74 chdir=/tmp/logstash-forwarder
+
+- name: make deb
+  command: env PATH=$PATH:/usr/local/go/bin make deb chdir=/tmp/logstash-forwarder creates=/tmp/logstash-forwarder/logstash-forwarder_0.3.1_amd64.deb
+  sudo: yes
+
+- name: dpkg -i logstash-forwarder_0.3.1_amd64.deb
+  command: dpkg -i logstash-forwarder_0.3.1_amd64.deb chdir=/tmp/logstash-forwarder creates=/opt/logstash-forwarder
+  sudo: yes
+
+# - name: add hosts for logstash
+  # lineinfile: dest=/etc/hosts line="{{logstash_forwarder_logstash_server_ip}} {{logstash_forwarder_logstash_server}} "
+  # sudo: yes
+
+- name: Ensure Logstash SSL key pair directory exists.
+  sudo: yes
+  file:
+    path: "{{ logstash_ssl_dir }}"
+    state: directory
+
+# - name: Copy CA certificate to client machine.
+#   copy: src=cacert.pem dest=/tmp
+#
+# - name: Copy ssl key over to client machine.
+#   copy: src=FreeBSDMadeEasy-key.pem dest=/tmp
+#
+# - name: Copy ssl certificate over to client machine.
+#   copy: src=FreeBSDMadeEasy-cert.pem dest=/tmp
+#
+# - name: Move CA certificate to trusted certs.
+#   shell: cp /tmp/cacert.pem {{ logstash_ssl_dir }}
+#   sudo: yes
+#
+# - name: Move ssl key to trusted certs.
+#   shell: cp /tmp/FreeBSDMadeEasy-key.pem {{ logstash_ssl_dir }}
+#   sudo: yes
+#
+# - name: Move certificate to trusted certs.
+#   shell: cp /tmp/FreeBSDMadeEasy-cert.pem {{ logstash_ssl_dir }}
+#   sudo: yes
+
+- name: Create logstash-forwarder configuration file.
+  sudo: yes
+  template:
+    src: logstash-forwarder.j2
+    dest: /etc/logstash-forwarder
+    mode: 0644
+  notify: restart logstash-forwarder
+
+- name: Ensure logstash-forwarder is started and enabled on boot.
+  sudo: yes
+  service: name=logstash-forwarder state=started enabled=yes

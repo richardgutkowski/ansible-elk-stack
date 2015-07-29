@@ -1,0 +1,12 @@
+---
+
+- name: Create log generator directory
+  file: path=/home/{{ ansible_ssh_user }}/log-generator/ state=directory mode=0755
+  sudo: yes
+
+- name: Install Thin init.d script
+  copy: src=log-generator-0.0.1-SNAPSHOT.jar dest=/home/{{ ansible_ssh_user }}/log-generator mode=0755
+  sudo: yes
+
+- name: start log generator
+  shell: bash -lc "java -jar /home/vagrant/log-generator/log-generator-0.0.1-SNAPSHOT.jar -n 100 -r 1000 -t 2"

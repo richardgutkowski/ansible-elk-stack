@@ -1,0 +1,14 @@
+---
+
+- name: Install Oracle Java 7
+  include: orc7.yml
+  when: Java.flavor == 'oracle' and Java.version == '7'
+
+- name: Install Oracle Java 8
+  include: orc8.yml
+  when: Java.flavor == 'oracle' and Java.version == '8'
+
+- name: Install OpenJDK
+  apt: pkg={{ item }} state=present update_cache=yes
+  with_items: {{ Java.openjdk }}
+  when: Java.flavor == 'openjdk'

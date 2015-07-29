@@ -1,0 +1,5 @@
+- name: Restart logstash
+  monit:
+    name=logstash
+    state=restarted
+  sudo: yes

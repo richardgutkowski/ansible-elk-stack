@@ -1,0 +1,51 @@
+---
+- name: Logstash apt repo
+  apt_repository: repo="deb http://packages.elasticsearch.org/logstash/{{ elk_logstash.version }}/{{ ansible_os_family|lower }} stable main"
+                  update_cache=yes
+  when: ansible_os_family == 'Debian'
+  sudo: yes
+
+- name: Install logstash apt packages
+  apt: pkg={{ item }}
+       update_cache=yes
+       state=latest
+  with_items:
+   - logstash
+   - logstash-contrib
+  sudo: yes
+  when: ansible_os_family == 'Debian'
+
+- name: Disable logstash auto start
+  lineinfile:
+    dest={{ item.path }}
+    regexp="^start on"
+    line="start on never"
+    state=absent
+  with_items:
+      - { path: '/etc/init/logstash.conf' }
+      - { path: '/etc/init/logstash-web.conf' }
+  sudo: yes
+
+- name: Override logstash-web from starting
+  template:
+    src=logstash.override.j2
+    dest=/etc/init/logstash-web.override
+    owner=root group=root mode=644
+  sudo: yes
+
+- name: Make monit to look after Logstash
+  template:
+    src=logstash.monitrc.conf.j2
+    dest=/etc/monit/conf.d/logstash.monitrc.conf
+    owner=root group=root mode=644
+  sudo: yes
+  notify: Reload monit
+
+- name: Logstash conf file
+  template:
+    src={{ item.src }}
+    dest=/etc/logstash/conf.d/{{ item.dest }}
+    owner=root group=root mode=644
+  with_items: elk_logstash.configs
+  sudo: yes
+  notify: Restart logstash

@@ -1,0 +1,14 @@
+{
+  "network": {
+    "servers": [ "{{ logstash_forwarder_logstash_server }}:{{ logstash_forwarder_logstash_server_port }}" ],
+    "timeout": 15
+  },
+  "files": [
+    {
+      "paths": [
+        "{{ logstash_logging_directory }}"
+       ],
+      "fields": { "type": "{{ logstash_log_type }}" }
+    }
+   ]
+}

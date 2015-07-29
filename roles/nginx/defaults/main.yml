@@ -1,0 +1,9 @@
+---
+Nginx:
+  user: nginx
+  ssl: false
+  ssltype: selfsigned
+  country: UK
+  county: London
+  location: London
+  days: 3650

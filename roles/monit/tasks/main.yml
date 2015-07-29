@@ -1,0 +1,12 @@
+---
+- name: Install monit
+  apt: pkg=monit state=latest
+  sudo: yes
+
+- name: Monit conf file
+  copy:
+    src=monitrc
+    dest=/etc/monit/monitrc
+    owner=root group=root mode=600
+  sudo: yes
+  notify: Restart monit

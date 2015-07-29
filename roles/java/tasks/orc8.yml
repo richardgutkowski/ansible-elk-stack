@@ -1,0 +1,20 @@
+---
+
+- name: update apt source list p1
+  shell: sudo sh -c 'echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" >> /etc/apt/sources.list'
+
+- name: update apt source list p2
+  shell: sudo sh -c 'echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" >> /etc/apt/sources.list'
+
+- name: added key
+  shell: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886
+
+- name: update cache
+  apt: update_cache=yes
+
+- name: Wizardry to bypass the Oracle License File prompt
+  shell: echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
+
+- name: install oracle8
+  apt: pkg={{ item }} state=present update_cache=yes
+  with_items: {{ Java.oracle8 }}

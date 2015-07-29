@@ -1,0 +1,6 @@
+---
+- name: Restart kibana
+  supervisorctl:
+    name=kibana
+    state=restarted
+  sudo: yes

@@ -1,0 +1,14 @@
+---
+- name: Staging ELK stack
+  hosts: all
+  sudo: yes
+  gather_facts: true
+  roles:
+    - { nginx: Nginx.ssl: "true", Nginx.ssltype: "selfsigned" }
+    - { java: Java.flavour: "oracle", Java.version: "8" }
+    - supervisor
+    - elasticsearch
+    - logstash-forwarder
+    - log-generator # This role is only used for testing purposes
+    - logstash
+    - kibana

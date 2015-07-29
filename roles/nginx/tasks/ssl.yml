@@ -1,0 +1,31 @@
+---
+
+- name: Create ssl directory
+  file: state=directory
+        path=/etc/nginx/ssl
+        owner=root
+        group=root
+  tags: ssl
+
+- name: Create self-singed SSL certificate
+  sudo: yes
+  command: openssl req -new -nodes -x509 -subj "/C={{ Nginx.ssl_country }}/ST={{ Nginx.ssl_county }}/L={{ Nginx.ssl_location }}/O=IT/CN=${ansible_fqdn}" -days {{ Nginx.ssl_days }} -keyout /etc/nginx/ssl/ssl_selfsigned.key -out /etc/nginx/ssl/ssl_selfsigned.crt -extensions v3_ca creates=/etc/nginx/ssl/ssl_selfsigned.crt
+  when: Nginx.ssltype == 'selfsigned'
+  notify: Reload nginx
+  tags: ssl
+
+- name: Create SHA-256 SSL key
+  sudo: yes
+  command: openssl genrsa -out sha256-{{ ssl_domain }}.key 2048
+    chdir=/etc/nginx/ssl
+  when: Nginx.ssl == 'true' and Nginx.ssltype == 'sha256'
+  register: sha256_key
+  tags: ssl
+
+- name: Create SHA-256 SSL certificate
+  sudo: yes
+  command: openssl req -new -key sha256-{{ ssl_domain }}.key -out sha256-{{ ssl_domain }}.csr -subj "/C={{ Nginx.ssl_country }}/ST={{ Nginx.ssl_county }}/L={{ Nginx.ssl_location }}/O=IT/CN=${ansible_fqdn}" -sha256 -days {{ Nginx.ssl_days }}
+    chdir=/etc/nginx/ssl
+  when: sha256_key.changed
+  notify: Reload nginx
+  tags: ssl

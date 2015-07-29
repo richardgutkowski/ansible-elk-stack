@@ -1,0 +1,13 @@
+---
+- name: Production ELK stack
+  hosts: all
+  sudo: yes
+  gather_facts: true
+  roles:
+    - nginx
+    - { java: java.flavour: "oracle", java.version: "8" }
+    - supervisor
+    - elasticsearch
+    - logstash-forwarder
+    - logstash
+    - kibana
